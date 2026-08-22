@@ -1,0 +1,40 @@
+schema: umicom.application.v1
+
+application:
+  id: org.umicom.tms
+  name: Umicom TMS
+  short_name: TMS
+  version: 0.1.0
+  executable: umicom-tms-console
+  aliases: [utms, tms]
+
+framework:
+  minimum_version: 0.9.0
+  compatible_major: 0
+
+frontends:
+  - console
+
+entry:
+  kind: financial
+  taskbar_group: treasury
+  pinned_by_default: false
+
+capabilities:
+  - context-links
+  - structured-selection
+  - model-selection-providers
+  - trading-workbench-profile
+  - framework-financial-services
+
+source_layout:
+  product_root: src
+  composition_root: src
+  console_frontend: src/console
+
+boundaries:
+  owns_trade_persistence: false
+  owns_accounting_engine: false
+  owns_risk_engine: false
+  owns_persistence: false
+  consumes_framework_services: true
