@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(
     UmicomTmsModule
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Thin Umicom TMS workbench composition"
     LANGUAGES C
 )
@@ -24,7 +24,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 option(UMICOM_TMS_BUILD_CONSOLE
-       "Build the native TMS verification console"
+       "Build the native Umicom TMS verification console"
        ON)
 
 include(CTest)
@@ -38,6 +38,10 @@ if(NOT TARGET Umicom::workbench_selection_provider)
     message(FATAL_ERROR
         "Umicom TMS requires Framework target "
         "Umicom::workbench_selection_provider")
+endif()
+if(NOT TARGET Umicom::application)
+    message(FATAL_ERROR
+        "Umicom TMS requires Framework target Umicom::application")
 endif()
 
 if(NOT COMMAND umicom_apply_warnings)
@@ -63,6 +67,10 @@ endif()
 
 add_library(umicom_tms_module STATIC
     src/workbench_profile.c
+    src/experience.c
+    src/runtime.c
+    src/readiness.c
+    src/workspace_commands.c
 )
 add_library(Umicom::tms_module ALIAS umicom_tms_module)
 
@@ -73,6 +81,7 @@ target_include_directories(umicom_tms_module PUBLIC
 target_link_libraries(umicom_tms_module PUBLIC
     Umicom::Framework
     Umicom::workbench_selection_provider
+    Umicom::application
 )
 umicom_apply_warnings(umicom_tms_module)
 umicom_apply_sanitizers(umicom_tms_module)
@@ -89,18 +98,58 @@ if(UMICOM_TMS_BUILD_CONSOLE)
 endif()
 
 if(BUILD_TESTING)
-    add_executable(umicom-tms-workbench-profile-test
+    add_executable(tms-workbench-profile-test
         tests/test_workbench_profile.c
     )
-    target_link_libraries(umicom-tms-workbench-profile-test PRIVATE
+    target_link_libraries(tms-workbench-profile-test PRIVATE
         Umicom::tms_module
     )
-    umicom_apply_warnings(umicom-tms-workbench-profile-test)
-    umicom_apply_sanitizers(umicom-tms-workbench-profile-test)
+    umicom_apply_warnings(tms-workbench-profile-test)
+    umicom_apply_sanitizers(tms-workbench-profile-test)
     add_test(
         NAME tms.module.workbench_profile
-        COMMAND umicom-tms-workbench-profile-test
+        COMMAND tms-workbench-profile-test
     )
+
+    add_executable(tms-experience-test
+        tests/test_experience.c
+    )
+    target_link_libraries(tms-experience-test PRIVATE
+        Umicom::tms_module
+    )
+    umicom_apply_warnings(tms-experience-test)
+    umicom_apply_sanitizers(tms-experience-test)
+    add_test(
+        NAME tms.module.experience
+        COMMAND tms-experience-test
+    )
+
+    add_executable(tms-runtime-test
+        tests/test_runtime.c
+    )
+    target_link_libraries(tms-runtime-test PRIVATE
+        umicom_tms_module
+    )
+    umicom_apply_warnings(tms-runtime-test)
+    umicom_apply_sanitizers(tms-runtime-test)
+    add_test(
+        NAME tms.module.runtime
+        COMMAND tms-runtime-test
+    )
+
+    add_executable(tms-readiness-runtime-test
+        tests/test_readiness_runtime.c
+    )
+    target_link_libraries(tms-readiness-runtime-test PRIVATE
+        umicom_tms_module
+    )
+    umicom_apply_warnings(tms-readiness-runtime-test)
+    umicom_apply_sanitizers(tms-readiness-runtime-test)
+    add_test(
+        NAME tms.module.readiness_runtime
+        COMMAND tms-readiness-runtime-test
+    )
+
 endif()
 
 install(TARGETS umicom_tms_module
@@ -119,4 +168,4 @@ install(FILES application.umicom.yaml README.md LICENSE
     DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/applications/tms)
 
 message(STATUS "Umicom TMS Module version: ${PROJECT_VERSION}")
-message(STATUS "Umicom TMS Framework workbench profile enabled")
+message(STATUS "Umicom TMS Framework workbench and experience profiles enabled")
