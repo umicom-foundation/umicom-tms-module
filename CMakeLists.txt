@@ -43,6 +43,10 @@ if(NOT TARGET Umicom::application)
     message(FATAL_ERROR
         "Umicom TMS requires Framework target Umicom::application")
 endif()
+if(NOT TARGET Umicom::finance_ui)
+    message(FATAL_ERROR
+        "Umicom TMS requires Framework target Umicom::finance_ui")
+endif()
 
 if(NOT COMMAND umicom_apply_warnings)
     function(umicom_apply_warnings target)
@@ -82,6 +86,7 @@ target_link_libraries(umicom_tms_module PUBLIC
     Umicom::Framework
     Umicom::workbench_selection_provider
     Umicom::application
+    Umicom::finance_ui
 )
 umicom_apply_warnings(umicom_tms_module)
 umicom_apply_sanitizers(umicom_tms_module)
@@ -148,6 +153,19 @@ if(BUILD_TESTING)
     add_test(
         NAME tms.module.readiness_runtime
         COMMAND tms-readiness-runtime-test
+    )
+
+    add_executable(tms-framework-views-test
+        tests/test_framework_views.c
+    )
+    target_link_libraries(tms-framework-views-test PRIVATE
+        Umicom::tms_module
+    )
+    umicom_apply_warnings(tms-framework-views-test)
+    umicom_apply_sanitizers(tms-framework-views-test)
+    add_test(
+        NAME tms.module.framework_views
+        COMMAND tms-framework-views-test
     )
 
 endif()
