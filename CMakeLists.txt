@@ -71,7 +71,6 @@ endif()
 
 add_library(umicom_tms_module STATIC
     src/workbench_profile.c
-    src/experience.c
     src/runtime.c
     src/readiness.c
     src/workspace_commands.c
@@ -114,19 +113,6 @@ if(BUILD_TESTING)
     add_test(
         NAME tms.module.workbench_profile
         COMMAND tms-workbench-profile-test
-    )
-
-    add_executable(tms-experience-test
-        tests/test_experience.c
-    )
-    target_link_libraries(tms-experience-test PRIVATE
-        Umicom::tms_module
-    )
-    umicom_apply_warnings(tms-experience-test)
-    umicom_apply_sanitizers(tms-experience-test)
-    add_test(
-        NAME tms.module.experience
-        COMMAND tms-experience-test
     )
 
     add_executable(tms-runtime-test
