@@ -16,6 +16,11 @@ Current composition:
 - Account
 - Context Inspector
 
-Future TMS batches can add product-specific treasury workflows and presentation,
+Future TMS work can add product-specific treasury workflows and presentation,
 while canonical financial services and context infrastructure remain Framework
 responsibilities.
+
+TMS now starts learning, standard and focus treasury layouts through the
+Framework product surface. The presentation layer can run without live services
+and stages financial commands for approval. See
+[the TMS application surface guide](docs/APPLICATION_SURFACE_GUIDE.md).

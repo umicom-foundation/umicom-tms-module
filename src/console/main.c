@@ -6,9 +6,12 @@
  *   Provide a tiny native verification frontend for the Framework-composed TMS
  *   workbench.  No treasury business processing lives in this executable.
  *
- * Created by: Sammy Hegab
- * Organisation: Umicom Foundation
- * Licence: MIT
+ * AUTHOR AND ORGANISATION:
+ * Sammy Hegab
+ * Umicom Foundation
+ *
+ * LICENCE:
+ * MIT
  *---------------------------------------------------------------------------*/
 
 #include <stdio.h>

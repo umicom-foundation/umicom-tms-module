@@ -6,9 +6,12 @@
 #   Build the thin Umicom TMS application composition over Framework-owned
 #   linked-workbench, selection-provider and context contracts.
 #
-# Created by: Sammy Hegab
-# Organisation: Umicom Foundation
-# Licence: MIT
+# AUTHOR AND ORGANISATION:
+#   Sammy Hegab
+#   Umicom Foundation
+#
+# LICENCE:
+#   MIT
 #-----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.24)
 
@@ -70,6 +73,8 @@ if(NOT COMMAND umicom_apply_sanitizers)
 endif()
 
 add_library(umicom_tms_module STATIC
+    src/application_surface.c
+    src/application_surface_controllers.c
     src/workbench_profile.c
     src/runtime.c
     src/readiness.c
@@ -102,6 +107,15 @@ if(UMICOM_TMS_BUILD_CONSOLE)
 endif()
 
 if(BUILD_TESTING)
+    add_executable(tms-application-surface-test
+        tests/test_application_surface.c)
+    target_link_libraries(tms-application-surface-test PRIVATE
+        Umicom::tms_module)
+    umicom_apply_warnings(tms-application-surface-test)
+    umicom_apply_sanitizers(tms-application-surface-test)
+    add_test(NAME tms.module.application_surface
+             COMMAND tms-application-surface-test)
+
     add_executable(tms-workbench-profile-test
         tests/test_workbench_profile.c
     )
