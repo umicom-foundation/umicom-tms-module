@@ -16,7 +16,7 @@
 #ifndef UMICOM_TMS_PRODUCTISATION_CONTRIBUTION_H
 #define UMICOM_TMS_PRODUCTISATION_CONTRIBUTION_H
 
-#include "umicom/application/productisation/adoption.h"
+#include "umicom/application/productisation/session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +26,8 @@ const UmiProductApplicationAdoption *
 umi_tms_productisation_contribution(void);
 UmiStatus umi_tms_productisation_snapshot(
     UmiProductApplicationAdoptionSnapshot *out_snapshot);
+UmiStatus umi_tms_product_session_init(
+    UmiProductApplicationSession *out_session);
 
 #ifdef __cplusplus
 }
