@@ -24,3 +24,7 @@ TMS now starts learning, standard and focus treasury layouts through the
 Framework product surface. The presentation layer can run without live services
 and stages financial commands for approval. See
 [the TMS application surface guide](docs/APPLICATION_SURFACE_GUIDE.md).
+
+The Windows suite installer exposes TMS as the optional **TMS** component.
+Until its graphical frontend is added, Umicom Desk launches the current TMS
+console through the same Framework-owned multi-application launcher.

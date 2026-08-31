@@ -19,6 +19,7 @@ entry:
   kind: financial
   taskbar_group: treasury
   pinned_by_default: false
+  default_layout: treasury
 
 capabilities:
   - context-links
@@ -38,3 +39,8 @@ boundaries:
   owns_risk_engine: false
   owns_persistence: false
   consumes_framework_services: true
+
+installation:
+  component: TMS
+  selected_by_default: true
+  show_in_application_launcher: true
