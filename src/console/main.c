@@ -18,6 +18,10 @@
 
 #include "umicom/tms/workbench_profile.h"
 
+/*
+ * Start this command or application, report setup failures, and return a process exit code
+ * to the operating system.
+ */
 int main(void)
 {
     UmiTmsWorkbenchProfile *profile = NULL;
@@ -25,6 +29,7 @@ int main(void)
     UmiStatus status;
 
     status = umi_tms_workbench_profile_create(&profile);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) {
         (void)fprintf(stderr,
                       "Unable to create TMS workbench profile: %d\n",
@@ -33,6 +38,7 @@ int main(void)
     }
 
     status = umi_tms_workbench_profile_snapshot(profile, &snapshot);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) {
         (void)fprintf(stderr,
                       "Unable to read TMS workbench profile: %d\n",

@@ -23,12 +23,24 @@
 extern "C" {
 #endif
 
+/**
+ * Initialise tms runtime from caller-provided values so later operations receive a known
+ * state.
+ */
 UmiStatus umi_tms_runtime_init(
     UmiApplicationWorkspaceRuntime *out_runtime);
+/**
+ * Provide the tms runtime health operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_runtime_health(
     UmiApplicationCapabilityProbe probe,
     void *user_data,
     UmiApplicationRuntimeHealth *out_health);
+/**
+ * Provide the tms runtime experience operation used by this module and its client
+ * applications.
+ */
 const UmiApplicationExperienceDefinition *umi_tms_runtime_experience(void);
 /* Compose an existing Framework cash position into the shared finance view model. */
 UmiStatus umi_tms_runtime_create_cash_position_view(

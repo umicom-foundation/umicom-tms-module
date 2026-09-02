@@ -28,12 +28,20 @@ static const UmiProductApplicationAdoption ADOPTION = {
     1
 };
 
+/*
+ * Provide the tms productisation contribution operation used by this module and its client
+ * applications.
+ */
 const UmiProductApplicationAdoption *
 umi_tms_productisation_contribution(void)
 {
     return &ADOPTION;
 }
 
+/*
+ * Provide the tms productisation snapshot operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_productisation_snapshot(
     UmiProductApplicationAdoptionSnapshot *out_snapshot)
 {

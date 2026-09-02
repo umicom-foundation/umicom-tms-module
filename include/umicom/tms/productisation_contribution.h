@@ -23,10 +23,22 @@
 extern "C" {
 #endif
 
+/**
+ * Provide the tms productisation contribution operation used by this module and its client
+ * applications.
+ */
 const UmiProductApplicationAdoption *
 umi_tms_productisation_contribution(void);
+/**
+ * Provide the tms productisation snapshot operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_productisation_snapshot(
     UmiProductApplicationAdoptionSnapshot *out_snapshot);
+/**
+ * Initialise tms product session from caller-provided values so later operations receive a
+ * known state.
+ */
 UmiStatus umi_tms_product_session_init(
     UmiProductApplicationSession *out_session);
 /* Build welcome-screen workspace choices from the canonical Framework profile. */

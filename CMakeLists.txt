@@ -29,32 +29,44 @@ set(CMAKE_C_EXTENSIONS OFF)
 option(UMICOM_TMS_BUILD_CONSOLE
        "Build the native Umicom TMS verification console"
        ON)
+option(UMICOM_TMS_BUILD_GTK4
+       "Build the Framework-rendered native Umicom TMS workstation"
+       ON)
 
 include(CTest)
 include(GNUInstallDirs)
 
+# Load the dependency only when the parent build has not already provided its target.
 if(NOT TARGET Umicom::Framework)
     find_package(UmicomFramework CONFIG REQUIRED)
 endif()
 
+# Load the dependency only when the parent build has not already provided its target.
 if(NOT TARGET Umicom::workbench_selection_provider)
     message(FATAL_ERROR
         "Umicom TMS requires Framework target "
         "Umicom::workbench_selection_provider")
 endif()
+# Load the dependency only when the parent build has not already provided its target.
 if(NOT TARGET Umicom::application)
     message(FATAL_ERROR
         "Umicom TMS requires Framework target Umicom::application")
 endif()
+# Load the dependency only when the parent build has not already provided its target.
 if(NOT TARGET Umicom::finance_ui)
     message(FATAL_ERROR
         "Umicom TMS requires Framework target Umicom::finance_ui")
 endif()
 
+# Define the local fallback only when the parent build did not provide the shared helper.
 if(NOT COMMAND umicom_apply_warnings)
+    # Define the apply warnings build helper so parent and application projects apply one
+    # consistent rule.
     function(umicom_apply_warnings target)
+        # Select the warning options understood by the active compiler.
         if(MSVC)
             target_compile_options(${target} PRIVATE /W4)
+        # Use this fallback path when the earlier condition does not apply.
         else()
             target_compile_options(${target} PRIVATE
                 -Wall
@@ -67,7 +79,10 @@ if(NOT COMMAND umicom_apply_warnings)
     endfunction()
 endif()
 
+# Define the local fallback only when the parent build did not provide the shared helper.
 if(NOT COMMAND umicom_apply_sanitizers)
+    # Define the apply sanitizers build helper so parent and application projects apply one
+    # consistent rule.
     function(umicom_apply_sanitizers target)
     endfunction()
 endif()
@@ -95,6 +110,7 @@ target_link_libraries(umicom_tms_module PUBLIC
 umicom_apply_warnings(umicom_tms_module)
 umicom_apply_sanitizers(umicom_tms_module)
 
+# Create this optional product surface only when its build option is enabled.
 if(UMICOM_TMS_BUILD_CONSOLE)
     add_executable(umicom-tms-console
         src/console/main.c
@@ -106,6 +122,47 @@ if(UMICOM_TMS_BUILD_CONSOLE)
     umicom_apply_sanitizers(umicom-tms-console)
 endif()
 
+# The TMS repository stays thin: it supplies guarded treasury controllers and
+# delegates the complete native workstation to Framework.
+if(UMICOM_TMS_BUILD_GTK4 AND TARGET Umicom::ui_gtk4)
+    add_library(umicom_tms_gtk STATIC src/gtk/workstation.c)
+    add_library(Umicom::tms_gtk ALIAS umicom_tms_gtk)
+    target_include_directories(umicom_tms_gtk PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(umicom_tms_gtk PUBLIC
+        Umicom::tms_module
+        Umicom::ui_gtk4)
+    umicom_apply_warnings(umicom_tms_gtk)
+    umicom_apply_sanitizers(umicom_tms_gtk)
+
+    add_executable(umicom-tms src/gtk/main.c)
+    target_link_libraries(umicom-tms PRIVATE Umicom::tms_gtk)
+    umicom_apply_warnings(umicom-tms)
+    umicom_apply_sanitizers(umicom-tms)
+    # Define the local fallback only when the parent build did not provide the shared helper.
+    if(NOT COMMAND umicom_apply_application_branding)
+        include(
+            "${CMAKE_CURRENT_SOURCE_DIR}/../../framework/cmake/UmicomApplicationBranding.cmake")
+    endif()
+    umicom_apply_application_branding(
+        TARGET umicom-tms
+        PRODUCT_NAME "Umicom TMS"
+        INTERNAL_NAME "umicom-tms"
+        APPLICATION_ID "org.umicom.tms"
+        VERSION_MAJOR ${PROJECT_VERSION_MAJOR}
+        VERSION_MINOR ${PROJECT_VERSION_MINOR}
+        VERSION_PATCH ${PROJECT_VERSION_PATCH}
+        RESOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../framework/resources"
+        DESKTOP_ENTRY
+        WINDOWS_GUI)
+# Apply this branch only when its contract condition is satisfied.
+elseif(UMICOM_TMS_BUILD_GTK4)
+    message(STATUS
+        "Umicom TMS native workstation disabled because Umicom::ui_gtk4 is unavailable")
+endif()
+
+# Register verification targets only when the developer has enabled testing.
 if(BUILD_TESTING)
     add_executable(tms-application-surface-test
         tests/test_application_surface.c)
@@ -176,8 +233,14 @@ install(TARGETS umicom_tms_module
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+# Configure the optional target only when its feature has created it.
 if(TARGET umicom-tms-console)
     install(TARGETS umicom-tms-console
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+# Configure the optional target only when its feature has created it.
+if(TARGET umicom-tms)
+    install(TARGETS umicom-tms
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 install(DIRECTORY include/

@@ -25,6 +25,7 @@ Framework product surface. The presentation layer can run without live services
 and stages financial commands for approval. See
 [the TMS application surface guide](docs/APPLICATION_SURFACE_GUIDE.md).
 
-The Windows suite installer exposes TMS as the optional **TMS** component.
-Until its graphical frontend is added, Umicom Desk launches the current TMS
-console through the same Framework-owned multi-application launcher.
+The native `umicom-tms` workstation presents role-based treasury layouts with
+Framework-owned identity, appearance, docking, floating, grouping and layout
+editing. The console remains available for verification and automation tasks.
+Umicom Desk launches the native workstation when TMS is selected.

@@ -22,16 +22,32 @@
 extern "C" {
 #endif
 
+/**
+ * Provide the tms workspace select layout operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_workspace_select_layout(
     UmiApplicationWorkspaceRuntime *runtime,
     const char *layout_id);
+/**
+ * Provide the tms workspace activate panel operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_workspace_activate_panel(
     UmiApplicationWorkspaceRuntime *runtime,
     const char *panel_id);
+/**
+ * Provide the tms workspace set context operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_workspace_set_context(
     UmiApplicationWorkspaceRuntime *runtime,
     const char *group_id,
     const char *value);
+/**
+ * Provide the tms workspace commands operation used by this module and its client
+ * applications.
+ */
 const UmiApplicationCommandSurface *umi_tms_workspace_commands(
     const UmiApplicationWorkspaceRuntime *runtime);
 

@@ -24,6 +24,7 @@ struct UmiTmsWorkbenchProfile {
     uint64_t revision;
 };
 
+/* Provide the copy text operation used by this module and its client applications. */
 static UmiStatus copy_text(char *destination,
                            size_t capacity,
                            const char *source)
@@ -34,18 +35,30 @@ static UmiStatus copy_text(char *destination,
         source != NULL ? source : "");
 }
 
+/*
+ * Initialise tms workbench profile from caller-provided values so later operations receive
+ * a known state.
+ */
 UmiStatus umi_tms_workbench_profile_create(
     UmiTmsWorkbenchProfile **out_profile)
 {
     UmiTmsWorkbenchProfile *profile;
     UmiStatus status;
 
+    /*
+     * Protect caller-owned memory by checking that required state is available before it is
+     * used.
+     */
     if (out_profile == NULL) {
         return UMI_STATUS_INVALID_ARGUMENT;
     }
 
     *out_profile = NULL;
     profile = (UmiTmsWorkbenchProfile *)calloc(1U, sizeof(*profile));
+    /*
+     * Protect caller-owned memory by checking that required state is available before it is
+     * used.
+     */
     if (profile == NULL) {
         return UMI_STATUS_OUT_OF_MEMORY;
     }
@@ -56,15 +69,18 @@ UmiStatus umi_tms_workbench_profile_create(
      */
     status = umi_workbench_selection_provider_trading_workbench_build(
         &profile->shared);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status == UMI_STATUS_OK) {
         status = umi_workbench_selection_provider_trading_workbench_validate(
             &profile->shared);
     }
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) {
         free(profile);
         return status;
     }
 
+    /* Use the stable identifier comparison to choose the matching record or policy. */
     if (strcmp(profile->shared.tms.application_id, "org.umicom.tms") != 0) {
         free(profile);
         return UMI_STATUS_INVALID_STATE;
@@ -75,18 +91,30 @@ UmiStatus umi_tms_workbench_profile_create(
     return UMI_STATUS_OK;
 }
 
+/*
+ * Release or reset state held by tms workbench profile so the same storage can be reused
+ * safely.
+ */
 void umi_tms_workbench_profile_destroy(
     UmiTmsWorkbenchProfile *profile)
 {
     free(profile);
 }
 
+/*
+ * Provide the tms workbench profile snapshot operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_workbench_profile_snapshot(
     const UmiTmsWorkbenchProfile *profile,
     UmiTmsWorkbenchProfileSnapshot *out_snapshot)
 {
     UmiStatus status;
 
+    /*
+     * Protect caller-owned memory by checking that required state is available before it is
+     * used.
+     */
     if (profile == NULL || out_snapshot == NULL) {
         return UMI_STATUS_INVALID_ARGUMENT;
     }
@@ -99,30 +127,35 @@ UmiStatus umi_tms_workbench_profile_snapshot(
         out_snapshot->application_id,
         sizeof(out_snapshot->application_id),
         profile->shared.tms.application_id);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) return status;
 
     status = copy_text(
         out_snapshot->profile_id,
         sizeof(out_snapshot->profile_id),
         profile->shared.tms.profile_id);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) return status;
 
     status = copy_text(
         out_snapshot->title,
         sizeof(out_snapshot->title),
         profile->shared.tms.title);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) return status;
 
     status = copy_text(
         out_snapshot->trading_group_id,
         sizeof(out_snapshot->trading_group_id),
         profile->shared.trading_group_id);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) return status;
 
     status = copy_text(
         out_snapshot->operations_group_id,
         sizeof(out_snapshot->operations_group_id),
         profile->shared.operations_group_id);
+    /* Preserve the original failure result so the caller can respond to the correct cause. */
     if (status != UMI_STATUS_OK) return status;
 
     out_snapshot->group_count = profile->shared.tms.group_count;
@@ -133,6 +166,10 @@ UmiStatus umi_tms_workbench_profile_snapshot(
     return UMI_STATUS_OK;
 }
 
+/*
+ * Provide the tms workbench profile context host operation used by this module and its
+ * client applications.
+ */
 const UmiWorkbenchContextHostProfile *
 umi_tms_workbench_profile_context_host(
     const UmiTmsWorkbenchProfile *profile)
@@ -140,6 +177,10 @@ umi_tms_workbench_profile_context_host(
     return profile != NULL ? &profile->shared.tms : NULL;
 }
 
+/*
+ * Provide the tms workbench profile context sources operation used by this module and its
+ * client applications.
+ */
 const UmiWorkbenchContextSourceTradingProfile *
 umi_tms_workbench_profile_context_sources(
     const UmiTmsWorkbenchProfile *profile)

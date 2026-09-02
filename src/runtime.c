@@ -17,19 +17,35 @@
 
 #include "umicom/application/experience_catalogue.h"
 
+/*
+ * Provide the tms runtime experience operation used by this module and its client
+ * applications.
+ */
 const UmiApplicationExperienceDefinition *umi_tms_runtime_experience(void)
 {
     return umi_application_experience_catalogue_find("org.umicom.tms");
 }
 
+/*
+ * Initialise tms runtime from caller-provided values so later operations receive a known
+ * state.
+ */
 UmiStatus umi_tms_runtime_init(UmiApplicationWorkspaceRuntime *out_runtime)
 {
     const UmiApplicationExperienceDefinition *experience =
         umi_tms_runtime_experience();
+    /*
+     * Protect caller-owned memory by checking that required state is available before it is
+     * used.
+     */
     if (experience == NULL) return UMI_STATUS_NOT_FOUND;
     return umi_application_workspace_runtime_init(experience, out_runtime);
 }
 
+/*
+ * Provide the tms runtime health operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_runtime_health(
     UmiApplicationCapabilityProbe probe,
     void *user_data,
@@ -37,6 +53,10 @@ UmiStatus umi_tms_runtime_health(
 {
     const UmiApplicationExperienceDefinition *experience =
         umi_tms_runtime_experience();
+    /*
+     * Protect caller-owned memory by checking that required state is available before it is
+     * used.
+     */
     if (experience == NULL) return UMI_STATUS_NOT_FOUND;
     return umi_application_runtime_health_evaluate(
         experience, probe, user_data, out_health);

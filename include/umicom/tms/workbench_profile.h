@@ -28,8 +28,15 @@ extern "C" {
 
 #define UMI_TMS_WORKBENCH_PROFILE_API_VERSION 1U
 
+/**
+ * Represent the tms workbench profile data shared with callers of this public contract.
+ */
 typedef struct UmiTmsWorkbenchProfile UmiTmsWorkbenchProfile;
 
+/**
+ * Represent the tms workbench profile snapshot data shared with callers of this public
+ * contract.
+ */
 typedef struct UmiTmsWorkbenchProfileSnapshot {
     uint32_t struct_size;
     uint32_t api_version;
@@ -43,17 +50,37 @@ typedef struct UmiTmsWorkbenchProfileSnapshot {
     uint64_t revision;
 } UmiTmsWorkbenchProfileSnapshot;
 
+/**
+ * Initialise tms workbench profile from caller-provided values so later operations receive
+ * a known state.
+ */
 UmiStatus umi_tms_workbench_profile_create(
     UmiTmsWorkbenchProfile **out_profile);
+/**
+ * Release or reset state held by tms workbench profile so the same storage can be reused
+ * safely.
+ */
 void umi_tms_workbench_profile_destroy(
     UmiTmsWorkbenchProfile *profile);
+/**
+ * Provide the tms workbench profile snapshot operation used by this module and its client
+ * applications.
+ */
 UmiStatus umi_tms_workbench_profile_snapshot(
     const UmiTmsWorkbenchProfile *profile,
     UmiTmsWorkbenchProfileSnapshot *out_snapshot);
 
+/**
+ * Provide the tms workbench profile context host operation used by this module and its
+ * client applications.
+ */
 const UmiWorkbenchContextHostProfile *
 umi_tms_workbench_profile_context_host(
     const UmiTmsWorkbenchProfile *profile);
+/**
+ * Provide the tms workbench profile context sources operation used by this module and its
+ * client applications.
+ */
 const UmiWorkbenchContextSourceTradingProfile *
 umi_tms_workbench_profile_context_sources(
     const UmiTmsWorkbenchProfile *profile);
