@@ -5,7 +5,9 @@ application:
   name: Umicom TMS
   short_name: TMS
   version: 0.1.0
-  executable: umicom-tms-console
+  executable: umicom-tms
+  native_executable: umicom-tms
+  console_executable: umicom-tms-console
   aliases: [utms, tms]
 
 framework:
@@ -14,6 +16,7 @@ framework:
 
 frontends:
   - console
+  - gtk
 
 entry:
   kind: financial
@@ -32,6 +35,7 @@ source_layout:
   product_root: src
   composition_root: src
   console_frontend: src/console
+  gtk_frontend: src/gtk
 
 boundaries:
   owns_trade_persistence: false

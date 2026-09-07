@@ -61,7 +61,28 @@ UmiStatus umi_tms_gtk_workstation_create(
     return UMI_STATUS_OK;
 }
 
+/* Forward explicit native titlebar adoption to the existing Framework owner. */
+UmiStatus umi_tms_gtk_workstation_bind_window(
+    UmiTmsGtkWorkstation *workstation, GtkWindow *window)
+{
+    return workstation != NULL
+        ? umi_application_product_gtk4_workstation_bind_window(workstation->framework_workstation, window)
+        : UMI_STATUS_INVALID_ARGUMENT;
+}
+
+/* Delegate explicit persistence to the existing shared layout owner. */
+UmiStatus umi_tms_gtk_workstation_enable_checkpoint_storage(
+    UmiTmsGtkWorkstation *workstation, int restore_saved)
+{
+    return workstation != NULL
+        ? umi_application_product_gtk4_workstation_enable_checkpoint_storage(
+            workstation->framework_workstation, restore_saved)
+        : UMI_STATUS_INVALID_ARGUMENT;
+}
+
+
 /* Destroy owned services in reverse creation order and accept NULL safely. */
+/* Release this composition after its layout-owned storage and widgets. */
 void umi_tms_gtk_workstation_destroy(UmiTmsGtkWorkstation *workstation)
 {
     /*

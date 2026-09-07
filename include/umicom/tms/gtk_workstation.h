@@ -32,6 +32,17 @@ typedef struct UmiTmsGtkWorkstation UmiTmsGtkWorkstation;
 /** Create TMS as a thin client of the Framework native product host. */
 UmiStatus umi_tms_gtk_workstation_create(
     UmiTmsGtkWorkstation **out_workstation);
+/** Bind the existing shared product identity to a native window before its
+ * first realization. The Framework owns titlebar composition and lifetime;
+ * no application catalogue or appearance state is duplicated. */
+UmiStatus umi_tms_gtk_workstation_bind_window(
+    UmiTmsGtkWorkstation *workstation, GtkWindow *window);
+/** Explicitly enable shared user-local SQLite layout checkpoints.
+ * Native launchers opt in after construction; constructors do no checkpoint I/O.
+ * A failed restore leaves the current layout visible and reports its error. */
+UmiStatus umi_tms_gtk_workstation_enable_checkpoint_storage(
+    UmiTmsGtkWorkstation *workstation, int restore_saved);
+
 /** Release the TMS boundary and all Framework services which it owns. */
 void umi_tms_gtk_workstation_destroy(UmiTmsGtkWorkstation *workstation);
 /** Borrow the root widget for a native application window. */

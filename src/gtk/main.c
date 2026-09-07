@@ -17,6 +17,8 @@
 #include <stdio.h>
 
 #include "umicom/tms/gtk_workstation.h"
+#include "umicom/ui/gtk4/workstation/shell_header.h"
+#include "umicom/ui/gtk4/workstation/window_fit.h"
 
 /* Tie workstation cleanup to the native window's lifetime. */
 static void workstation_destroy_notify(gpointer data)
@@ -40,6 +42,13 @@ static void on_activate(GtkApplication *application, gpointer user_data)
         g_application_quit(G_APPLICATION(application));
         return;
     }
+    /* Only the real native launcher opts into disk checkpoints. */
+    {
+        UmiStatus storage_status = umi_tms_gtk_workstation_enable_checkpoint_storage(workstation, 1);
+        if (storage_status != UMI_STATUS_OK)
+            (void)fprintf(stderr, "Layout storage unavailable: %s\n", umi_status_text(storage_status));
+    }
+
     content = umi_tms_gtk_workstation_widget(workstation);
     /*
      * Protect caller-owned memory by checking that required state is available before it is
@@ -52,8 +61,18 @@ static void on_activate(GtkApplication *application, gpointer user_data)
     }
     window = GTK_WINDOW(gtk_application_window_new(application));
     gtk_window_set_title(window, "Umicom TMS");
-    gtk_window_set_default_size(window, 1240, 800);
-    gtk_window_set_resizable(window, TRUE);
+    (void)umi_gtk4_ws_apply_window_identity(window);
+    /* Let Framework adapt the preferred workstation size to the display. */
+    (void)umi_gtk4_ws_window_fit(window, 1240, 800, 960, 600);
+    /* Bind the existing Framework identity before the first realization. */
+    status = umi_tms_gtk_workstation_bind_window(workstation, window);
+    if (status != UMI_STATUS_OK) {
+        (void)fprintf(stderr, "Umicom TMS titlebar failed: %s\n", umi_status_text(status));
+        umi_tms_gtk_workstation_destroy(workstation);
+        gtk_window_destroy(window);
+        g_application_quit(G_APPLICATION(application));
+        return;
+    }
     gtk_window_set_child(window, content);
     g_object_set_data_full(G_OBJECT(window), "umicom-tms-workstation",
                            workstation, workstation_destroy_notify);
