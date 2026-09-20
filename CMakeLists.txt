@@ -227,6 +227,18 @@ if(BUILD_TESTING)
 
 endif()
 
+# Commands without a provider must not become fictional approval requests.
+if(BUILD_TESTING)
+    add_executable(tms-command-feedback-test tests/test_command_feedback.c)
+    target_link_libraries(tms-command-feedback-test PRIVATE Umicom::tms_module)
+    umicom_apply_warnings(tms-command-feedback-test)
+    umicom_apply_sanitizers(tms-command-feedback-test)
+    foreach(case IN ITEMS command dirty refresh)
+        add_test(NAME tms.command_feedback.${case} COMMAND tms-command-feedback-test ${case})
+        set_tests_properties(tms.command_feedback.${case} PROPERTIES TIMEOUT 30)
+    endforeach()
+endif()
+
 install(TARGETS umicom_tms_module
     EXPORT UmicomTmsModuleTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
