@@ -17,6 +17,7 @@
 #define UMICOM_TMS_RUNTIME_H
 
 #include "umicom/application/runtime/runtime.h"
+#include "umicom/finance_ui/funds_review.h"
 #include "umicom/finance_ui/finance_ui.h"
 
 #ifdef __cplusplus
@@ -51,6 +52,13 @@ UmiStatus umi_tms_runtime_create_cash_forecast_view(
     const UmiTreasuryCashForecast *forecast,
     UmiUiViewModel **out_view);
 
+
+/** Review caller-supplied cash flows without creating a treasury trade.
+ * Delegates to Framework funds_review.h. Currency and scale must match.
+ * Negative projected cash/headroom remains visible as a forecast shortfall. */
+UmiStatus UmiTmsRuntimeReviewCash(const UmiMoney *opening,
+    const UmiMoney *inflows, const UmiMoney *outflows, const UmiMoney *buffer,
+    UmiFinanceCashReview *out);
 #ifdef __cplusplus
 }
 #endif

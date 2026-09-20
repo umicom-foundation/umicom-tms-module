@@ -82,3 +82,11 @@ UmiStatus umi_tms_runtime_create_cash_forecast_view(
     return umi_finance_ui_cash_forecast_view_create(
         "cash-forecast", forecast, out_view);
 }
+
+/* Product composition delegates the financial calculation to Framework. */
+UmiStatus UmiTmsRuntimeReviewCash(const UmiMoney *opening,
+    const UmiMoney *inflows, const UmiMoney *outflows, const UmiMoney *buffer,
+    UmiFinanceCashReview *out)
+{
+    return UmiFinanceReviewCash(opening, inflows, outflows, buffer, out);
+}

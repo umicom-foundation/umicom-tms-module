@@ -16,12 +16,14 @@
 #include "umicom/tms/gtk_workstation.h"
 
 #include <stdlib.h>
+#include "umicom/ui/gtk4/finance_review.h"
 
 #include "umicom/tms/application_surface.h"
 #include "umicom/tms/application_surface_controllers.h"
 
 struct UmiTmsGtkWorkstation {
     UmiApplicationProductGtk4Workstation *framework_workstation;
+    GtkWidget *root;
 };
 
 /* TMS contributes product identity and guarded controllers while Framework
@@ -57,6 +59,20 @@ UmiStatus umi_tms_gtk_workstation_create(
         umi_tms_gtk_workstation_destroy(workstation);
         return status;
     }
+    /* Compose the reusable manual review above the existing workstation.
+     * Calculations remain in Framework; this product owns only the assembly. */
+    GtkWidget *review = NULL;
+    status = UmiGtk4FinanceReviewCreate(UMI_GTK4_FINANCE_REVIEW_CASH, &review);
+    if (status != UMI_STATUS_OK) {
+        umi_tms_gtk_workstation_destroy(workstation);
+        return status;
+    }
+    workstation->root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    g_object_ref_sink(workstation->root);
+    gtk_box_append(GTK_BOX(workstation->root), review);
+    GtkWidget *inner = umi_application_product_gtk4_workstation_widget(workstation->framework_workstation);
+    gtk_widget_set_vexpand(inner, TRUE);
+    gtk_box_append(GTK_BOX(workstation->root), inner);
     *out_workstation = workstation;
     return UMI_STATUS_OK;
 }
@@ -90,19 +106,33 @@ void umi_tms_gtk_workstation_destroy(UmiTmsGtkWorkstation *workstation)
      * used.
      */
     if (workstation == NULL) return;
+    /* A native window may retain the composition root. Remove the service-
+     * backed body and disable the wrapper before releasing its owner reference. */
+    if (workstation->root != NULL) {
+        gtk_widget_set_sensitive(workstation->root, FALSE);
+        GtkWidget *inner = umi_application_product_gtk4_workstation_widget(workstation->framework_workstation);
+        if (inner != NULL && gtk_widget_get_parent(inner) == workstation->root)
+            gtk_box_remove(GTK_BOX(workstation->root), inner);
+    }
     umi_application_product_gtk4_workstation_destroy(
         workstation->framework_workstation);
     workstation->framework_workstation = NULL;
+    g_clear_object(&workstation->root);
     free(workstation);
 }
 
+/* Migration: this composition now owns the wrapper; its children are
+ * the manual-review component and the unchanged Framework product body. */
 /* Borrow the shared root; callers must not destroy it independently. */
 GtkWidget *umi_tms_gtk_workstation_widget(UmiTmsGtkWorkstation *workstation)
 {
-    return workstation != NULL
-        ? umi_application_product_gtk4_workstation_widget(
-              workstation->framework_workstation)
-        : NULL;
+    /* The old body-only return is preserved here. The wrapper now contains
+     * both the Framework review component and the unchanged product body. */
+    // return workstation != NULL
+    // ? umi_application_product_gtk4_workstation_widget(
+    // workstation->framework_workstation)
+    // : NULL;
+    return workstation != NULL ? workstation->root : NULL;
 }
 
 /* Role-specific layout selection stays inside the canonical Framework model. */

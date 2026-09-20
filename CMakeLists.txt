@@ -270,3 +270,21 @@ umicom_add_application_productisation_contribution(
     TARGET "umicom_tms_productisation"
     SOURCE "src/productisation_contribution.c"
     TEST_SOURCE "tests/test_productisation_contribution.c")
+
+# The product entry point delegates to the same Framework review used by GTK.
+if(BUILD_TESTING)
+    add_executable(tms-workflow-tools-test tests/test_workflow_tools.c)
+    target_link_libraries(tms-workflow-tools-test PRIVATE Umicom::tms_module)
+    if(COMMAND umicom_apply_warnings)
+        umicom_apply_warnings(tms-workflow-tools-test)
+        umicom_apply_sanitizers(tms-workflow-tools-test)
+    endif()
+    foreach(case IN ITEMS valid currency overflow no-side-effects)
+        add_test(NAME tms.workflow_tools.${case} COMMAND tms-workflow-tools-test ${case})
+        set_tests_properties(tms.workflow_tools.${case} PROPERTIES TIMEOUT 30 LABELS "tms;workflow;regression")
+    endforeach()
+endif()
+
+# Install the public workflow lesson beside this product's other guides.
+install(FILES docs/WORKFLOW_TOOLS.html
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/tms/docs)
