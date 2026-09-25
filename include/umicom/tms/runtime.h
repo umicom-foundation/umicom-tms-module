@@ -3,7 +3,8 @@
  * File: include/umicom/tms/runtime.h
  *
  * PURPOSE:
- *   Bind the thin product to the Framework-owned application workspace runtime without duplicating services.
+ *   Bind the thin product to Framework-owned application, finance and Open TMS
+ *   runtime contracts without duplicating treasury services.
  *
  * AUTHOR AND ORGANISATION:
  * Sammy Hegab
@@ -19,6 +20,7 @@
 #include "umicom/application/runtime/runtime.h"
 #include "umicom/finance_ui/funds_review.h"
 #include "umicom/finance_ui/finance_ui.h"
+#include "umicom/open_tms/service.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,6 +61,23 @@ UmiStatus umi_tms_runtime_create_cash_forecast_view(
 UmiStatus UmiTmsRuntimeReviewCash(const UmiMoney *opening,
     const UmiMoney *inflows, const UmiMoney *outflows, const UmiMoney *buffer,
     UmiFinanceCashReview *out);
+
+/**
+ * Initialise the Framework-owned Open TMS service used by the product.
+ */
+void umi_tms_runtime_open_tms_init(UmiOpenTmsService *service);
+
+/**
+ * Copy the Framework-owned Open TMS operational snapshot.
+ *
+ * TMS remains a presentation/composition repository. FX lifecycle, pricing,
+ * positions, risk, settlement, accounting and reconciliation remain Framework-owned.
+ */
+UmiStatus umi_tms_runtime_open_tms_snapshot(
+    const UmiOpenTmsService *service,
+    uint64_t now_milliseconds,
+    UmiOpenTmsServiceSnapshot *out_snapshot);
+
 #ifdef __cplusplus
 }
 #endif

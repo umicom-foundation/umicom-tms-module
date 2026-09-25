@@ -3,7 +3,8 @@
  * File: src/runtime.c
  *
  * PURPOSE:
- *   Initialise the product through canonical Framework application runtime contracts.
+ *   Initialise the product through canonical Framework application, finance and
+ *   Open TMS runtime contracts.
  *
  * AUTHOR AND ORGANISATION:
  * Sammy Hegab
@@ -89,4 +90,20 @@ UmiStatus UmiTmsRuntimeReviewCash(const UmiMoney *opening,
     UmiFinanceCashReview *out)
 {
     return UmiFinanceReviewCash(opening, inflows, outflows, buffer, out);
+}
+
+/* Thin product boundary over the Framework-owned Open TMS service. */
+void umi_tms_runtime_open_tms_init(UmiOpenTmsService *service)
+{
+    umi_open_tms_service_init(service);
+}
+
+/* Thin snapshot forwarding: no treasury calculations are duplicated here. */
+UmiStatus umi_tms_runtime_open_tms_snapshot(
+    const UmiOpenTmsService *service,
+    uint64_t now_milliseconds,
+    UmiOpenTmsServiceSnapshot *out_snapshot)
+{
+    return umi_open_tms_service_snapshot(
+        service, now_milliseconds, out_snapshot);
 }
