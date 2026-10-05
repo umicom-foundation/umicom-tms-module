@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include "umicom/ui/gtk4/finance_review.h"
+#include "umicom/ui/gtk4/cash_plan.h"
 
 #include "umicom/tms/application_surface.h"
 #include "umicom/tms/application_surface_controllers.h"
@@ -69,6 +70,8 @@ UmiStatus umi_tms_gtk_workstation_create(
     }
     workstation->root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     g_object_ref_sink(workstation->root);
+    /* Dated planning shares the Framework owner and never changes account balances. */
+    gtk_box_append(GTK_BOX(workstation->root), UmiGtk4CashPlanLauncherCreate());
     gtk_box_append(GTK_BOX(workstation->root), review);
     GtkWidget *inner = umi_application_product_gtk4_workstation_widget(workstation->framework_workstation);
     gtk_widget_set_vexpand(inner, TRUE);

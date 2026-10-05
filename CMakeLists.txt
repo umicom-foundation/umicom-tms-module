@@ -288,3 +288,20 @@ endif()
 # Install the public workflow lesson beside this product's other guides.
 install(FILES docs/WORKFLOW_TOOLS.html
     DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/tms/docs)
+
+# Exercise the product identity boundary against the shared transaction owner.
+if(BUILD_TESTING)
+    add_executable(umicom_tms_module-context-review-test tests/test_context_review.c)
+    target_link_libraries(umicom_tms_module-context-review-test PRIVATE umicom_tms_module)
+    umicom_apply_warnings(umicom_tms_module-context-review-test)
+    umicom_apply_sanitizers(umicom_tms_module-context-review-test)
+    foreach(context_case publication stale foreign clear divergent_ui)
+        add_test(NAME tms.context_review.${context_case}
+            COMMAND umicom_tms_module-context-review-test ${context_case})
+        set_tests_properties(tms.context_review.${context_case} PROPERTIES
+            LABELS "application;context-review;tms")
+    endforeach()
+    if(COMMAND umicom_register_validation_target)
+        umicom_register_validation_target(umicom_tms_module-context-review-test)
+    endif()
+endif()
