@@ -305,3 +305,8 @@ if(BUILD_TESTING)
         umicom_register_validation_target(umicom_tms_module-context-review-test)
     endif()
 endif()
+
+
+# Install the shared workflow explanation beside this product's existing guides.
+install(FILES docs/STATEMENT_RECONCILIATION.html
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/tms/docs)
