@@ -341,3 +341,19 @@ if(TARGET umicom-tms-console AND TARGET Umicom::finance)
     endif()
     unset(_tms_clearing_definitions)
 endif()
+
+# Delivery recovery is a shared service; this host supplies only presentation.
+if(TARGET umicom-tms-console AND TARGET Umicom::financial_inbox)
+    target_link_libraries(umicom-tms-console PRIVATE Umicom::financial_inbox)
+    get_target_property(_tms_outbox_definitions Umicom::financial_inbox INTERFACE_COMPILE_DEFINITIONS)
+    if(BUILD_TESTING AND "UMICOM_HAS_UFMP_OUTBOX=1" IN_LIST _tms_outbox_definitions)
+        add_test(NAME tms.ufmp.outbox-recovery COMMAND umicom-tms-console --outbox-recovery)
+        set_tests_properties(tms.ufmp.outbox-recovery PROPERTIES TIMEOUT 30
+            PASS_REGULAR_EXPRESSION "Automatic retry after ambiguity: no"
+            LABELS "application;tms;ufmp;synthetic;regression")
+        if(COMMAND umicom_test_impact_owners)
+            umicom_test_impact_owners(tms.ufmp.outbox-recovery TARGETS umicom-tms-console)
+        endif()
+    endif()
+    unset(_tms_outbox_definitions)
+endif()
