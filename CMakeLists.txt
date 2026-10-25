@@ -310,3 +310,34 @@ endif()
 # Install the shared workflow explanation beside this product's existing guides.
 install(FILES docs/STATEMENT_RECONCILIATION.html
     DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/tms/docs)
+
+# Use the shared synthetic financial-message workflow; older SDKs retain the
+# original console and report an unavailable optional command explicitly.
+if(TARGET umicom-tms-console AND TARGET Umicom::finance)
+    target_link_libraries(umicom-tms-console PRIVATE Umicom::finance)
+    get_target_property(_tms_ufmp_definitions Umicom::finance INTERFACE_COMPILE_DEFINITIONS)
+    if(BUILD_TESTING AND "UMICOM_HAS_UFMP_FOUNDATION=1" IN_LIST _tms_ufmp_definitions)
+        add_test(NAME tms.ufmp.simulation COMMAND umicom-tms-console --ufmp-simulate)
+        set_tests_properties(tms.ufmp.simulation PROPERTIES TIMEOUT 30
+            PASS_REGULAR_EXPRESSION "Changed payload refused: yes"
+            LABELS "application;tms;ufmp;synthetic;regression")
+        if(COMMAND umicom_test_impact_owners)
+            umicom_test_impact_owners(tms.ufmp.simulation TARGETS umicom-tms-console)
+        endif()
+    endif()
+    unset(_tms_ufmp_definitions)
+endif()
+
+# The preview is calculated by Framework; a product host never nets money itself.
+if(TARGET umicom-tms-console AND TARGET Umicom::finance)
+    get_target_property(_tms_clearing_definitions Umicom::finance INTERFACE_COMPILE_DEFINITIONS)
+    if(BUILD_TESTING AND "UMICOM_HAS_UFMP_CLEARING=1" IN_LIST _tms_clearing_definitions)
+        add_test(NAME tms.ufmp.clearing-preview COMMAND umicom-tms-console --clearing-preview)
+        set_tests_properties(tms.ufmp.clearing-preview PROPERTIES TIMEOUT 30
+            PASS_REGULAR_EXPRESSION "Net receive: -8500" LABELS "application;tms;ufmp;synthetic;regression")
+        if(COMMAND umicom_test_impact_owners)
+            umicom_test_impact_owners(tms.ufmp.clearing-preview TARGETS umicom-tms-console)
+        endif()
+    endif()
+    unset(_tms_clearing_definitions)
+endif()
