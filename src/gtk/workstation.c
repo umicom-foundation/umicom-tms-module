@@ -19,6 +19,12 @@
 #include "umicom/ui/gtk4/finance_review.h"
 #include "umicom/ui/gtk4/cash_plan.h"
 #include "umicom/ui/gtk4/bank_feed.h"
+#if defined(UMICOM_HAS_ACCOUNTING_PRACTICE)
+#include "umicom/ui/gtk4/accounting_practice.h"
+#endif
+#if defined(UMICOM_HAS_FORWARD_PRACTICE)
+#include "umicom/ui/gtk4/forward_practice.h"
+#endif
 
 #include "umicom/tms/application_surface.h"
 #include "umicom/tms/application_surface_controllers.h"
@@ -76,6 +82,23 @@ UmiStatus umi_tms_gtk_workstation_create(
     /* Import and reconcile privately held statements through the shared owner.
      * This review does not post into practice accounts or treasury plans. */
     gtk_box_append(GTK_BOX(workstation->root), UmiBankFeedGtk4LauncherCreate());
+    /* Local draft/review mechanics are shared Framework behaviour. This
+     * independent practice window has no treasury permissions or persistence. */
+    /* Preserve this composition when an older SDK lacks the optional surface. */
+#if defined(UMICOM_HAS_FORWARD_PRACTICE)
+    gtk_box_append(GTK_BOX(workstation->root), UmiGtk4ForwardPracticeLauncherCreate());
+#else
+    GtkWidget *forwardUnavailable = gtk_label_new("FX-forward practice requires a newer Framework SDK.");
+    gtk_box_append(GTK_BOX(workstation->root), forwardUnavailable);
+#endif
+    /* Framework owns bounded accounting capture and immutable batch reviews;
+     * TMS contributes only the launcher. Local flags never post a ledger. */
+#if defined(UMICOM_HAS_ACCOUNTING_PRACTICE)
+    gtk_box_append(GTK_BOX(workstation->root), UmiGtk4AccountingPracticeLauncherCreate());
+#else
+    GtkWidget *accountingUnavailable = gtk_label_new("Accounting batch practice requires a newer Framework SDK.");
+    gtk_box_append(GTK_BOX(workstation->root), accountingUnavailable);
+#endif
     gtk_box_append(GTK_BOX(workstation->root), review);
     GtkWidget *inner = umi_application_product_gtk4_workstation_widget(workstation->framework_workstation);
     gtk_widget_set_vexpand(inner, TRUE);
