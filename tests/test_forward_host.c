@@ -37,6 +37,14 @@ static GtkWidget *Find(GtkWindow *window, const char *name) {
 int main(int argc, char **argv) {
     CHECK(argc == 2);
     if (!gtk_init_check()) return 77;
+    /* Record the loaded toolkit, not only compiler headers: native backend
+     * lifetime defects can depend on the DLL selected by the process. These
+     * diagnostics do not relax assertions or turn a crash into a passing skip. */
+    fprintf(stderr, "TMS forward host %s: GTK runtime %u.%u.%u; headers %u.%u.%u; backend %s\n",
+        argv[1], gtk_get_major_version(), gtk_get_minor_version(), gtk_get_micro_version(),
+        GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION,
+        G_OBJECT_TYPE_NAME(gdk_display_get_default()));
+    fflush(stderr);
     UmiTmsGtkWorkstation *workstation = NULL;
     CHECK(umi_tms_gtk_workstation_create(&workstation) == UMI_STATUS_OK);
     GtkWindow *parent = GTK_WINDOW(gtk_window_new()); g_object_ref(parent);
@@ -58,8 +66,11 @@ int main(int argc, char **argv) {
     } else if (!strcmp(argv[1], "independent")) {
         g_signal_emit_by_name(launch, "clicked");
         GtkWindow *second = Child(parent, first); CHECK(second != NULL);
+        fprintf(stderr, "Independent child created; inspecting its separate state.\n"); fflush(stderr);
         CHECK(UmiGtk4ForwardPracticeRead(second, book) == UMI_STATUS_OK && book->count == 0U);
+        fprintf(stderr, "Disposing independent child and its input widgets.\n"); fflush(stderr);
         gtk_window_destroy(second); g_object_unref(second);
+        fprintf(stderr, "Independent child disposed; checking surviving host.\n"); fflush(stderr);
         CHECK(UmiGtk4ForwardPracticeRead(first, book) == UMI_STATUS_OK && book->count == 1U);
     } else {
         CHECK(!strcmp(argv[1], "retire"));
@@ -69,6 +80,7 @@ int main(int argc, char **argv) {
         g_signal_emit_by_name(launch, "clicked");
         CHECK(g_list_model_get_n_items(gtk_window_get_toplevels()) == count);
     }
+    fprintf(stderr, "Disposing surviving host and parent.\n"); fflush(stderr);
     gtk_window_destroy(first); gtk_window_destroy(parent);
     umi_tms_gtk_workstation_destroy(workstation);
     g_object_unref(launch); g_object_unref(first); g_object_unref(parent); free(book);
