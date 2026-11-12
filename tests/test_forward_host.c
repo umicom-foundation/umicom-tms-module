@@ -50,6 +50,26 @@ int main(int argc, char **argv) {
     GtkWindow *parent = GTK_WINDOW(gtk_window_new()); g_object_ref(parent);
     gtk_window_set_child(parent, umi_tms_gtk_workstation_widget(workstation));
     GtkWidget *launch = Find(parent, "treasury.forward.launch"); g_object_ref(launch);
+    /* A retained product root can outlive its owner while the parent window
+     * remains open. Semantic signals must honor both local and inherited state. */
+    if (!strcmp(argv[1], "disabled-self") || !strcmp(argv[1], "disabled-ancestor") ||
+        !strcmp(argv[1], "owner-retired")) {
+        if (!strcmp(argv[1], "disabled-self")) gtk_widget_set_sensitive(launch, FALSE);
+        else if (!strcmp(argv[1], "disabled-ancestor"))
+            gtk_widget_set_sensitive(umi_tms_gtk_workstation_widget(workstation), FALSE);
+        else {
+            umi_tms_gtk_workstation_destroy(workstation);
+            workstation = NULL;
+        }
+        guint count = g_list_model_get_n_items(gtk_window_get_toplevels());
+        g_signal_emit_by_name(launch, "clicked");
+        g_signal_emit_by_name(launch, "clicked");
+        CHECK(g_list_model_get_n_items(gtk_window_get_toplevels()) == count);
+        gtk_window_destroy(parent);
+        umi_tms_gtk_workstation_destroy(workstation);
+        g_object_unref(launch); g_object_unref(parent);
+        return 0;
+    }
     g_signal_emit_by_name(launch, "clicked");
     GtkWindow *first = Child(parent, NULL); CHECK(first != NULL);
     UmiOpenTmsFxForwardBook *book = malloc(sizeof *book); CHECK(book != NULL);

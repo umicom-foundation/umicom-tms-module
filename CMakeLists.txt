@@ -120,6 +120,24 @@ if(UMICOM_TMS_BUILD_CONSOLE)
     )
     umicom_apply_warnings(umicom-tms-console)
     umicom_apply_sanitizers(umicom-tms-console)
+
+    # Console products use the same Framework-owned identity as their GUI host.
+    # Retain console subsystem and existing runtime ownership; this adds only
+    # canonical artwork and native executable metadata.
+    if(NOT COMMAND umicom_apply_application_branding)
+        include("${CMAKE_CURRENT_SOURCE_DIR}/../../framework/cmake/UmicomApplicationBranding.cmake")
+    endif()
+    if(WIN32)
+        enable_language(RC)
+    endif()
+    umicom_apply_application_branding(
+        TARGET umicom-tms-console
+        PRODUCT_NAME "Umicom TMS Console" INTERNAL_NAME "umicom-tms-console"
+        VERSION_MAJOR ${PROJECT_VERSION_MAJOR}
+        VERSION_MINOR ${PROJECT_VERSION_MINOR}
+        VERSION_PATCH ${PROJECT_VERSION_PATCH}
+        RESOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../framework/resources"
+        NO_RUNTIME_DEPLOYMENT)
 endif()
 
 # The TMS repository stays thin: it supplies guarded treasury controllers and
@@ -369,7 +387,7 @@ if(BUILD_TESTING AND TARGET umicom_tms_gtk)
         if(COMMAND umicom_register_validation_target)
             umicom_register_validation_target(umi-tms-forward-host-test)
         endif()
-        foreach(scenario capture-review independent retire)
+        foreach(scenario capture-review independent retire disabled-self disabled-ancestor owner-retired)
             set(test tms.forward_host.${scenario})
             add_test(NAME ${test} COMMAND umi-tms-forward-host-test ${scenario})
             set_tests_properties(${test} PROPERTIES TIMEOUT 75 SKIP_RETURN_CODE 77
@@ -394,7 +412,7 @@ if(BUILD_TESTING AND TARGET umicom_tms_gtk)
         if(COMMAND umicom_register_validation_target)
             umicom_register_validation_target(umi-tms-accounting-host-test)
         endif()
-        foreach(scenario capture-review independent retire)
+        foreach(scenario capture-review independent retire disabled-self disabled-ancestor owner-retired)
             set(test tms.accounting_host.${scenario})
             add_test(NAME ${test} COMMAND umi-tms-accounting-host-test ${scenario})
             set_tests_properties(${test} PROPERTIES TIMEOUT 75 SKIP_RETURN_CODE 77
