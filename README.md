@@ -20,6 +20,19 @@ Future TMS work can add product-specific treasury workflows and presentation,
 while canonical financial services and context infrastructure remain Framework
 responsibilities.
 
+## Review the value of a practice FX forward
+
+The Framework example records the book revision, trade version, valuation
+date, forward quote revision and discount curve revision together. Run
+`umi-treasury-forward-consumer valuation` from a Framework test build. The
+practice case calculates `1000 × (1.375 − 1.25) × 0.5 = 62.50 USD` for a
+long GBP position. The market and contract rates are USD per GBP.
+
+If the trade or observed market rate changes, capture a fresh review and check
+the market inputs again. A missing market rate leaves the price unavailable.
+The result is a quote-currency valuation. Journal review separately checks
+exact minor units, account selection, period rules and debit and credit totals.
+
 TMS now starts learning, standard and focus treasury layouts through the
 Framework product surface. The presentation layer can run without live services
 and stages financial commands for approval. See

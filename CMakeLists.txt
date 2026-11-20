@@ -329,12 +329,21 @@ endif()
 install(FILES docs/STATEMENT_RECONCILIATION.html
     DESTINATION ${CMAKE_INSTALL_DATADIR}/umicom/tms/docs)
 
-# Use the shared synthetic financial-message workflow; older SDKs retain the
-# original console and report an unavailable optional command explicitly.
+# Use the shared synthetic treasury and financial-message workflows. Older
+# SDKs retain the original console and report unavailable features explicitly.
 if(TARGET umicom-tms-console AND TARGET Umicom::finance)
     target_link_libraries(umicom-tms-console PRIVATE Umicom::finance)
-    get_target_property(_tms_ufmp_definitions Umicom::finance INTERFACE_COMPILE_DEFINITIONS)
-    if(BUILD_TESTING AND "UMICOM_HAS_UFMP_FOUNDATION=1" IN_LIST _tms_ufmp_definitions)
+    get_target_property(_tms_finance_definitions Umicom::finance INTERFACE_COMPILE_DEFINITIONS)
+    if(BUILD_TESTING AND "UMICOM_HAS_TMS_FORWARD_CASHFLOWS=1" IN_LIST _tms_finance_definitions)
+        add_test(NAME tms.fx_forward.cashflows COMMAND umicom-tms-console --fx-cashflows)
+        set_tests_properties(tms.fx_forward.cashflows PROPERTIES TIMEOUT 30
+            PASS_REGULAR_EXPRESSION "Receive: 1000[.]00 GBP[\r\n]+Pay: 1250[.]00 USD"
+            LABELS "application;tms;fx-forward;synthetic;regression")
+        if(COMMAND umicom_test_impact_owners)
+            umicom_test_impact_owners(tms.fx_forward.cashflows TARGETS umicom-tms-console)
+        endif()
+    endif()
+    if(BUILD_TESTING AND "UMICOM_HAS_UFMP_FOUNDATION=1" IN_LIST _tms_finance_definitions)
         add_test(NAME tms.ufmp.simulation COMMAND umicom-tms-console --ufmp-simulate)
         set_tests_properties(tms.ufmp.simulation PROPERTIES TIMEOUT 30
             PASS_REGULAR_EXPRESSION "Changed payload refused: yes"
@@ -343,7 +352,7 @@ if(TARGET umicom-tms-console AND TARGET Umicom::finance)
             umicom_test_impact_owners(tms.ufmp.simulation TARGETS umicom-tms-console)
         endif()
     endif()
-    unset(_tms_ufmp_definitions)
+    unset(_tms_finance_definitions)
 endif()
 
 # The preview is calculated by Framework; a product host never nets money itself.

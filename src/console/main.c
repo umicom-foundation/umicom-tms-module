@@ -26,6 +26,9 @@
 #ifdef UMICOM_HAS_UFMP_CLEARING
 #include "umicom/financial_messaging/clearing_preview.h"
 #endif
+#ifdef UMICOM_HAS_TMS_FORWARD_CASHFLOWS
+#include "umicom/open_tms/fx_forward_cashflows.h"
+#endif
 
 #include "umicom/tms/workbench_profile.h"
 
@@ -80,6 +83,22 @@ static int RunDefault(void)
 int main(int argc, char **argv)
 {
     if (argc == 1) return RunDefault();
+    if (argc == 2 && strcmp(argv[1], "--fx-cashflows") == 0) {
+#ifdef UMICOM_HAS_TMS_FORWARD_CASHFLOWS
+        /* Framework checks the confirmation and renders both legs as one
+         * forecast. The console only presents that shared result. */
+        char report[384];
+        UmiStatus status = UmiOpenTmsFxForwardCashflowsExample(report, sizeof report);
+        if (status != UMI_STATUS_OK) {
+            fprintf(stderr, "FX cashflow forecast failed: %d\n", (int)status);
+            return 1;
+        }
+        return fputs(report, stdout) == EOF ? 1 : 0;
+#else
+        fputs("This Framework SDK does not include FX cashflow forecasts.\n", stderr);
+        return 2;
+#endif
+    }
     if (argc == 2 && strcmp(argv[1], "--ufmp-simulate") == 0) {
 #ifdef UMICOM_HAS_UFMP_FOUNDATION
         char report[1024];
@@ -150,5 +169,6 @@ int main(int argc, char **argv)
 #endif
     fputs("Usage: umicom-tms-console [--ufmp-simulate | --clearing-preview | --outbox-recovery]\n", stderr);
     fputs("       --outbox-list <existing-sqlite-database> [next-cursor]\n", stderr);
+    fputs("       --fx-cashflows\n", stderr);
     return 2;
 }
